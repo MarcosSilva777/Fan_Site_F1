@@ -16,8 +16,23 @@ import {
   formatShortDate,
 } from '../utils/format.js';
 import { getDriverImage, driverAvatarSvg } from '../api/images.js';
+import { observeReveals, observeCountUp, countUp, reducedMotion } from '../components/animations.js';
+import { loadGsap } from '../components/gsap-loader.js';
 
 mountLayout();
+
+async function animateProfileHero() {
+  if (reducedMotion) return;
+  try {
+    const { gsap } = await loadGsap({ withScrollTrigger: false });
+    if (!gsap) return;
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    tl.from('.profile-hero__eyebrow', { y: 20, opacity: 0, duration: 0.7 })
+      .from('.profile-hero__title', { y: 36, opacity: 0, duration: 1.0, filter: 'blur(10px)' }, '-=0.4')
+      .from('.profile-hero__meta > *', { y: 14, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.6')
+      .from('.profile-hero__photo', { scale: 0.85, opacity: 0, duration: 1.1, ease: 'expo.out' }, '-=0.9');
+  } catch {}
+}
 
 const SEASON = new Date().getFullYear();
 const params = new URLSearchParams(window.location.search);
@@ -96,9 +111,9 @@ async function loadDriver() {
       <section class="section">
         <div class="container">
           <header class="section-title"><h2>Estatísticas</h2></header>
-          <div id="driver-stats" class="stats-grid">
-            <div class="stat-card"><div class="stat-card__label">Pontos ${SEASON}</div><div class="stat-card__value">${standingRow?.points ?? '—'}</div></div>
-            <div class="stat-card"><div class="stat-card__label">Vitórias ${SEASON}</div><div class="stat-card__value">${standingRow?.wins ?? '—'}</div></div>
+          <div id="driver-stats" class="stats-grid" data-reveal-stagger>
+            <div class="stat-card"><div class="stat-card__label">Pontos ${SEASON}</div><div class="stat-card__value" data-season-count="${standingRow?.points ?? ''}">${standingRow?.points ?? '—'}</div></div>
+            <div class="stat-card"><div class="stat-card__label">Vitórias ${SEASON}</div><div class="stat-card__value" data-season-count="${standingRow?.wins ?? ''}">${standingRow?.wins ?? '—'}</div></div>
             <div class="stat-card"><div class="stat-card__label">Vitórias na carreira</div><div class="stat-card__value" data-stat="wins"><span class="loading"></span></div></div>
             <div class="stat-card"><div class="stat-card__label">Pódios na carreira</div><div class="stat-card__value" data-stat="podiums"><span class="loading"></span></div></div>
             <div class="stat-card"><div class="stat-card__label">Pole positions</div><div class="stat-card__value" data-stat="poles"><span class="loading"></span></div></div>
@@ -130,13 +145,23 @@ async function loadDriver() {
     ]).then(([w, p, q, s]) => {
       const set = (k, v) => {
         const el = document.querySelector(`[data-stat="${k}"]`);
-        if (el) el.textContent = v ?? '—';
+        if (!el) return;
+        if (v === null || v === undefined) { el.textContent = '—'; return; }
+        countUp(el, v, { duration: 1200 });
       };
       set('wins', w);
       set('podiums', p);
       set('poles', q);
       set('starts', s);
     });
+
+    document.querySelectorAll('[data-season-count]').forEach((el) => {
+      const v = Number(el.dataset.seasonCount);
+      if (Number.isFinite(v)) observeCountUp(el, v, { duration: 1000 });
+    });
+
+    observeReveals(root);
+    animateProfileHero();
   } catch (err) {
     root.innerHTML = `<div class="container section"><div class="error-message">Falha ao carregar piloto: ${err.message}</div></div>`;
   }

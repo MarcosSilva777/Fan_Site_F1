@@ -3,8 +3,23 @@ import { getDriverStandings, getConstructorStandings } from '../api/jolpica.js';
 import { teamTheme } from '../data/teams.js';
 import { nationalityToFlagUrl } from '../utils/format.js';
 import { getDriverImage, getTeamImage, driverAvatarSvg, teamLogoSvg } from '../api/images.js';
+import { observeReveals, reducedMotion } from '../components/animations.js';
 
 mountLayout();
+
+function applyRowStagger(panel) {
+  if (reducedMotion) return;
+  const rows = panel.querySelectorAll('.data-table tbody tr');
+  rows.forEach((tr, i) => {
+    tr.style.opacity = '0';
+    tr.style.transform = 'translateX(-12px)';
+    tr.style.transition = `opacity 480ms var(--ease-out-expo) ${i * 30}ms, transform 480ms var(--ease-out-expo) ${i * 30}ms, background var(--dur-fast) var(--ease-out-quart)`;
+    requestAnimationFrame(() => {
+      tr.style.opacity = '';
+      tr.style.transform = '';
+    });
+  });
+}
 
 const SEASON = new Date().getFullYear();
 
@@ -111,11 +126,14 @@ async function load() {
 
   function switchTo(tab) {
     tabs.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
+    panel.classList.add('panel-fade-out');
+    setTimeout(() => panel.classList.remove('panel-fade-out'), 220);
     panel.innerHTML = `<div class="loading-block"><span class="loading"></span> Carregando…</div>`;
     if (tab === 'drivers') {
       getDriverStandings(SEASON)
         .then((rows) => {
           panel.innerHTML = renderDrivers(rows);
+          applyRowStagger(panel);
           rows.forEach((row) => {
             getDriverImage(row.Driver).then((src) => {
               if (!src) return;
@@ -129,6 +147,7 @@ async function load() {
       getConstructorStandings(SEASON)
         .then((rows) => {
           panel.innerHTML = renderConstructors(rows);
+          applyRowStagger(panel);
           rows.forEach((row) => {
             getTeamImage(row.Constructor).then((src) => {
               if (!src) return;

@@ -3,6 +3,7 @@ import { getDriverStandings, getDrivers } from '../api/jolpica.js';
 import { teamTheme } from '../data/teams.js';
 import { nationalityToFlagUrl, nationalityToCountry } from '../utils/format.js';
 import { getDriverImage, driverAvatarSvg } from '../api/images.js';
+import { observeReveals, attachCardHoverTracking } from '../components/animations.js';
 
 mountLayout();
 
@@ -16,7 +17,7 @@ function buildCard({ driver, team, position, points }) {
   const fallback = driverAvatarSvg(driver, theme.color);
 
   return `
-    <a class="card driver-card" href="./piloto.html?id=${driver.driverId}" style="--team-color: ${theme.color};" data-driver-id="${driver.driverId}">
+    <a class="card driver-card" href="./piloto.html?id=${driver.driverId}" style="--team-color: ${theme.color};" data-driver-id="${driver.driverId}" data-reveal="up">
       <div class="card-team-bar"></div>
       <img class="driver-card__photo" src="${fallback}" data-fallback="${fallback}" alt="" loading="lazy">
       <div class="driver-card__bg-number" aria-hidden="true">${number}</div>
@@ -76,7 +77,11 @@ async function load() {
       return;
     }
 
-    grid.innerHTML = cards.map(buildCard).join('');
+    grid.innerHTML = cards
+      .map((c, i) => buildCard(c).replace('data-reveal="up"', `data-reveal="up" data-reveal-delay="${i * 50}"`))
+      .join('');
+    observeReveals(grid);
+    attachCardHoverTracking(grid);
     hydrateDriverPhotos(cards);
   } catch (err) {
     grid.innerHTML = `<div class="error-message">Falha ao carregar pilotos: ${err.message}</div>`;

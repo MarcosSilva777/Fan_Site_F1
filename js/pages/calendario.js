@@ -7,6 +7,7 @@ import {
   formatTime,
   countryToFlagUrl,
 } from '../utils/format.js';
+import { observeReveals, attachCardHoverTracking, reducedMotion } from '../components/animations.js';
 
 mountLayout();
 
@@ -26,7 +27,7 @@ function buildRaceCard(race, status) {
   const detailHref = `./gp.html?season=${race.season}&round=${race.round}`;
 
   return `
-    <a class="card race-card" href="${detailHref}" data-month="${start ? start.getMonth() : ''}">
+    <a class="card race-card" href="${detailHref}" data-month="${start ? start.getMonth() : ''}" data-reveal="up" data-status="${status}">
       <div class="race-card__round">
         <span>Etapa ${race.round}</span>
         ${badge}
@@ -103,15 +104,32 @@ async function load() {
     }
 
     const classified = classifyRaces(races);
-    const html = classified.map(({ race, status }) => buildRaceCard(race, status)).join('');
+    const html = classified
+      .map(({ race, status }, i) =>
+        buildRaceCard(race, status).replace('data-reveal="up"', `data-reveal="up" data-reveal-delay="${i * 40}"`)
+      )
+      .join('');
     grid.innerHTML = html;
+    observeReveals(grid);
+    attachCardHoverTracking(grid);
 
     renderFilter(filterHost, races, (selected) => {
       grid.querySelectorAll('.race-card').forEach((card) => {
-        if (selected === 'all') {
+        const matches = selected === 'all' || card.dataset.month === selected;
+        if (reducedMotion) {
+          card.style.display = matches ? '' : 'none';
+          return;
+        }
+        if (matches) {
           card.style.display = '';
+          requestAnimationFrame(() => {
+            card.style.opacity = '';
+            card.style.transform = '';
+          });
         } else {
-          card.style.display = card.dataset.month === selected ? '' : 'none';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.94)';
+          setTimeout(() => { card.style.display = 'none'; }, 240);
         }
       });
     });

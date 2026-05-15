@@ -14,8 +14,31 @@ import {
   countryToFlagUrl,
 } from '../utils/format.js';
 import { teamTheme } from '../data/teams.js';
+import { observeReveals, observeCountUp, reducedMotion } from '../components/animations.js';
+import { loadGsap } from '../components/gsap-loader.js';
 
 mountLayout();
+
+function revealHero() {
+  const content = document.querySelector('.hero__content');
+  if (content) content.classList.add('hero-ready');
+}
+
+async function animateHero() {
+  revealHero();
+  if (reducedMotion) return;
+  try {
+    const { gsap } = await loadGsap({ withScrollTrigger: false });
+    if (!gsap) return;
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    tl.from('.hero__eyebrow', { y: 24, opacity: 0, duration: 0.9, immediateRender: false })
+      .from('.hero__title', { y: 40, opacity: 0, duration: 1.1, filter: 'blur(12px)', immediateRender: false }, '-=0.65')
+      .from('.hero__lead', { y: 24, opacity: 0, duration: 0.9, immediateRender: false }, '-=0.7')
+      .from('.hero__cta > *', { y: 18, opacity: 0, duration: 0.7, stagger: 0.12, immediateRender: false }, '-=0.5');
+  } catch {}
+}
+
+animateHero();
 
 const SEASON = new Date().getFullYear();
 
@@ -80,20 +103,40 @@ function renderNextRace(container, race) {
 
 function renderCountdownCells(t) {
   return `
-    <div class="countdown__cell"><span class="countdown__value">${pad(t.days, 3)}</span><span class="countdown__label">Dias</span></div>
-    <div class="countdown__cell"><span class="countdown__value">${pad(t.hours)}</span><span class="countdown__label">Horas</span></div>
-    <div class="countdown__cell"><span class="countdown__value">${pad(t.minutes)}</span><span class="countdown__label">Min</span></div>
-    <div class="countdown__cell"><span class="countdown__value">${pad(t.seconds)}</span><span class="countdown__label">Seg</span></div>
+    <div class="countdown__cell"><span class="countdown__value" data-cd="days">${pad(t.days, 3)}</span><span class="countdown__label">Dias</span></div>
+    <div class="countdown__cell"><span class="countdown__value" data-cd="hours">${pad(t.hours)}</span><span class="countdown__label">Horas</span></div>
+    <div class="countdown__cell"><span class="countdown__value" data-cd="minutes">${pad(t.minutes)}</span><span class="countdown__label">Min</span></div>
+    <div class="countdown__cell"><span class="countdown__value" data-cd="seconds">${pad(t.seconds)}</span><span class="countdown__label">Seg</span></div>
   `;
 }
 
 function startCountdown(node, target) {
   if (!node) return;
+  const lastValues = { days: null, hours: null, minutes: null, seconds: null };
+  const updateCell = (key, newValue, digits = 2) => {
+    const cell = node.querySelector(`[data-cd="${key}"]`);
+    if (!cell) return;
+    const display = pad(newValue, digits);
+    if (lastValues[key] === display) return;
+    lastValues[key] = display;
+    if (reducedMotion) {
+      cell.textContent = display;
+      return;
+    }
+    cell.classList.remove('countdown__value--tick');
+    void cell.offsetWidth;
+    cell.textContent = display;
+    cell.classList.add('countdown__value--tick');
+  };
   const tick = () => {
     const t = timeUntil(target);
-    node.innerHTML = renderCountdownCells(t);
+    updateCell('days', t.days, 3);
+    updateCell('hours', t.hours);
+    updateCell('minutes', t.minutes);
+    updateCell('seconds', t.seconds);
     if (t.isPast) clearInterval(timer);
   };
+  tick();
   const timer = setInterval(tick, 1000);
 }
 
@@ -104,23 +147,25 @@ function renderDriverStandings(container, standings) {
   }
   const top3 = standings.slice(0, 3);
   container.innerHTML = top3
-    .map((row) => {
+    .map((row, i) => {
       const driver = row.Driver;
       const team = row.Constructors?.[0];
       const theme = teamTheme(team?.constructorId);
       const medal = ['gold', 'silver', 'bronze'][parseInt(row.position, 10) - 1] || '';
       return `
-        <div class="standings-preview__row" style="--team-color: ${theme.color};">
+        <div class="standings-preview__row" style="--team-color: ${theme.color}; --stagger-index: ${i};" data-reveal="up">
           <span class="position-pill ${medal}">${row.position}</span>
           <div>
             <div class="standings-preview__name">${driver.givenName} ${driver.familyName}</div>
             <div class="standings-preview__team">${team?.name ?? ''}</div>
           </div>
-          <span class="standings-preview__points">${row.points}<small style="font-size:.6em; color: var(--color-text-muted);"> PTS</small></span>
+          <span class="standings-preview__points"><span data-points-target="${row.points}">0</span><small style="font-size:.6em; color: var(--color-text-muted);"> PTS</small></span>
         </div>
       `;
     })
     .join('');
+  hookCountUpPoints(container);
+  observeReveals(container);
 }
 
 function renderConstructorStandings(container, standings) {
@@ -130,22 +175,31 @@ function renderConstructorStandings(container, standings) {
   }
   const top3 = standings.slice(0, 3);
   container.innerHTML = top3
-    .map((row) => {
+    .map((row, i) => {
       const team = row.Constructor;
       const theme = teamTheme(team?.constructorId);
       const medal = ['gold', 'silver', 'bronze'][parseInt(row.position, 10) - 1] || '';
       return `
-        <div class="standings-preview__row" style="--team-color: ${theme.color};">
+        <div class="standings-preview__row" style="--team-color: ${theme.color}; --stagger-index: ${i};" data-reveal="up">
           <span class="position-pill ${medal}">${row.position}</span>
           <div>
             <div class="standings-preview__name">${team?.name ?? ''}</div>
             <div class="standings-preview__team">${team?.nationality ?? ''}</div>
           </div>
-          <span class="standings-preview__points">${row.points}<small style="font-size:.6em; color: var(--color-text-muted);"> PTS</small></span>
+          <span class="standings-preview__points"><span data-points-target="${row.points}">0</span><small style="font-size:.6em; color: var(--color-text-muted);"> PTS</small></span>
         </div>
       `;
     })
     .join('');
+  hookCountUpPoints(container);
+  observeReveals(container);
+}
+
+function hookCountUpPoints(container) {
+  container.querySelectorAll('[data-points-target]').forEach((el) => {
+    const target = Number(el.dataset.pointsTarget);
+    if (Number.isFinite(target)) observeCountUp(el, target, { duration: 1500 });
+  });
 }
 
 async function loadHome() {

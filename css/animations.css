@@ -1,0 +1,626 @@
+:root {
+  --dur-instant: 120ms;
+  --dur-fast: 220ms;
+  --dur-base: 380ms;
+  --dur-slow: 620ms;
+  --dur-slower: 900ms;
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  transition:
+    opacity var(--dur-slow) var(--ease-out-expo),
+    transform var(--dur-slow) var(--ease-out-expo);
+  will-change: opacity, transform;
+}
+
+[data-reveal="fade"] {
+  transform: none;
+}
+
+[data-reveal="left"] {
+  transform: translate3d(-36px, 0, 0);
+}
+
+[data-reveal="right"] {
+  transform: translate3d(36px, 0, 0);
+}
+
+[data-reveal="scale"] {
+  transform: scale(0.92);
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+[data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition:
+    opacity var(--dur-slow) var(--ease-out-expo),
+    transform var(--dur-slow) var(--ease-out-expo);
+  transition-delay: calc(var(--stagger-index, 0) * 60ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal-stagger].is-visible > * {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.card {
+  transition:
+    transform var(--dur-base) var(--ease-out-expo),
+    border-color var(--dur-base) var(--ease-out-expo),
+    box-shadow var(--dur-base) var(--ease-out-expo),
+    background var(--dur-base) var(--ease-out-expo);
+  will-change: transform;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    520px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--team-color, var(--color-f1-red)) 16%, transparent),
+    transparent 45%
+  );
+  transition: opacity var(--dur-base) var(--ease-out-quart);
+  z-index: 1;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+.card:hover {
+  transform: translate3d(0, -8px, 0);
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.6),
+    0 0 0 1px color-mix(in srgb, var(--team-color, var(--color-f1-red)) 38%, transparent),
+    0 0 40px color-mix(in srgb, var(--team-color, var(--color-f1-red)) 18%, transparent);
+}
+
+.card-team-bar {
+  transform-origin: left center;
+  transform: scaleX(0.55);
+  transition: transform var(--dur-base) var(--ease-out-expo);
+}
+
+.card:hover .card-team-bar {
+  transform: scaleX(1);
+}
+
+.driver-card::before,
+.team-card::before {
+  transform-origin: left center;
+  transform: scaleX(0.55);
+  transition: transform var(--dur-base) var(--ease-out-expo);
+}
+
+.driver-card:hover::before,
+.team-card:hover::before {
+  transform: scaleX(1);
+}
+
+.driver-card .driver-card__photo {
+  transition: transform var(--dur-slow) var(--ease-out-expo), filter var(--dur-base) var(--ease-out-expo);
+}
+
+.driver-card:hover .driver-card__photo {
+  transform: scale(1.04) translateY(-4px);
+  filter: saturate(1.15) contrast(1.06);
+}
+
+.driver-card .driver-card__bg-number {
+  transition: opacity var(--dur-base) var(--ease-out-expo), transform var(--dur-base) var(--ease-out-expo);
+}
+
+.driver-card:hover .driver-card__bg-number {
+  opacity: 0.32 !important;
+  transform: translateY(-6px) scale(1.04);
+}
+
+.btn {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform var(--dur-fast) var(--ease-out-expo),
+    background var(--dur-fast) var(--ease-out-expo),
+    box-shadow var(--dur-base) var(--ease-out-expo),
+    color var(--dur-fast) var(--ease-out-expo);
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  transform: translateX(-110%);
+  transition: transform var(--dur-slow) var(--ease-out-expo);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.btn:hover::before {
+  transform: translateX(110%);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 30px rgba(225, 6, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 40px rgba(225, 6, 0, 0.25);
+}
+
+.tab {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--color-f1-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out-expo);
+}
+
+.tab[aria-selected="true"]::after {
+  transform: scaleX(0);
+}
+
+.tab:hover:not([aria-selected="true"])::after {
+  transform: scaleX(1);
+}
+
+.data-table tbody tr {
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    transform var(--dur-fast) var(--ease-out-quart);
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-bg-hover);
+  transform: translateX(4px);
+}
+
+.data-table tbody tr td:first-child {
+  position: relative;
+}
+
+.data-table tbody tr td:first-child::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--team-color, var(--color-f1-red));
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform var(--dur-base) var(--ease-out-expo);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--team-color, transparent) 60%, transparent);
+}
+
+.data-table tbody tr:hover td:first-child::before {
+  transform: scaleY(1);
+}
+
+.nav__link {
+  position: relative;
+}
+
+.nav__link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-red);
+  transition:
+    width var(--dur-base) var(--ease-out-expo),
+    left var(--dur-base) var(--ease-out-expo);
+}
+
+.nav__link:hover::after {
+  width: 80%;
+  left: 10%;
+}
+
+.brand__logo {
+  transition: transform var(--dur-slow) var(--ease-spring), box-shadow var(--dur-base) var(--ease-out-expo);
+}
+
+.brand:hover .brand__logo {
+  transform: rotate(-8deg) scale(1.1);
+  box-shadow: 0 8px 24px rgba(225, 6, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.avatar,
+.team-logo-avatar,
+.team-card__logo {
+  transition:
+    transform var(--dur-base) var(--ease-out-expo),
+    border-color var(--dur-base) var(--ease-out-expo),
+    box-shadow var(--dur-base) var(--ease-out-expo);
+}
+
+.avatar-stack:hover .avatar,
+.avatar-stack:hover .team-logo-avatar {
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--team-color, #000) 45%, transparent);
+}
+
+.team-card:hover .team-card__logo {
+  transform: rotate(-5deg) scale(1.06);
+}
+
+.position-pill {
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.data-table tbody tr:hover .position-pill {
+  transform: scale(1.12);
+}
+
+.stat-card {
+  transition:
+    transform var(--dur-base) var(--ease-out-expo),
+    border-color var(--dur-base) var(--ease-out-expo),
+    box-shadow var(--dur-base) var(--ease-out-expo);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.loading-block {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(225, 6, 0, 0.06) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-anim {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(225, 6, 0, 0); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.count-up {
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+}
+
+@keyframes slide-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes blur-in {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+.hero-blur-in {
+  animation: blur-in var(--dur-slower) var(--ease-out-expo) both;
+}
+
+.page-header h1 {
+  background-image: var(--gradient-text-sheen);
+  background-size: 220% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: text-sheen 7s ease-in-out infinite;
+}
+
+@keyframes text-sheen {
+  0%, 100% { background-position: 220% center; }
+  50% { background-position: -120% center; }
+}
+
+body {
+  transition: opacity 220ms var(--ease-out-quart), transform 220ms var(--ease-out-quart);
+}
+
+body.page-transition-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+body.page-transition-leave {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+
+::view-transition-old(root) {
+  animation-name: vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: vt-fade-in;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(225, 6, 0, 0.22), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(102, 146, 255, 0.12), transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 24, 1, 0.05), transparent 70%);
+  animation: hero-drift 16s ease-in-out infinite alternate;
+  filter: blur(50px);
+  opacity: 0.9;
+}
+
+@keyframes hero-drift {
+  0% { transform: translate3d(-3%, -2%, 0) scale(1); }
+  100% { transform: translate3d(3%, 2%, 0) scale(1.10); }
+}
+
+.hero {
+  isolation: isolate;
+}
+
+.hero__content > * {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--dur-slow) var(--ease-out-expo), transform var(--dur-slow) var(--ease-out-expo);
+}
+
+.hero__content.hero-ready > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero__content.hero-ready > *:nth-child(1) { transition-delay: 0ms; }
+.hero__content.hero-ready > *:nth-child(2) { transition-delay: 80ms; }
+.hero__content.hero-ready > *:nth-child(3) { transition-delay: 160ms; }
+.hero__content.hero-ready > *:nth-child(4) { transition-delay: 240ms; }
+.hero__content.hero-ready > *:nth-child(5) { transition-delay: 320ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__content > * {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero__title strong {
+  display: inline-block;
+  background: linear-gradient(110deg, var(--color-f1-red) 0%, #ff5040 50%, var(--color-f1-red) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: text-sheen 5s ease-in-out infinite;
+}
+
+.countdown__cell {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-spring), border-color var(--dur-base) var(--ease-out-expo);
+}
+
+.countdown__cell:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-f1-red);
+}
+
+.countdown__cell::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--gradient-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-out-expo);
+}
+
+.countdown__cell:hover::after {
+  transform: scaleX(1);
+}
+
+.countdown__value {
+  transition: color var(--dur-base) var(--ease-out-expo);
+  display: inline-block;
+  transform-origin: center bottom;
+}
+
+@keyframes countdown-tick {
+  0% { transform: translateY(-6px) scaleY(0.85); opacity: 0; }
+  60% { transform: translateY(2px) scaleY(1.05); opacity: 1; }
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+.countdown__value--tick {
+  animation: countdown-tick 360ms var(--ease-out-expo);
+}
+
+#standings-panel,
+#gp-panel {
+  transition: opacity 220ms var(--ease-out-quart), transform 220ms var(--ease-out-quart);
+}
+
+#standings-panel.panel-fade-out,
+#gp-panel.panel-fade-out {
+  opacity: 0.3;
+  transform: translateY(6px);
+}
+
+.countdown__cell:hover .countdown__value {
+  color: var(--color-f1-red);
+}
+
+.standings-preview__row {
+  position: relative;
+  overflow: hidden;
+  transition: background var(--dur-fast) var(--ease-out-expo), padding var(--dur-base) var(--ease-out-expo), transform var(--dur-fast) var(--ease-out-expo);
+}
+
+.standings-preview__row::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--team-color, var(--color-f1-red));
+  transform: scaleY(0.4);
+  transform-origin: center;
+  transition: transform var(--dur-base) var(--ease-out-expo);
+  border-radius: 2px;
+}
+
+.standings-preview__row:hover::before {
+  transform: scaleY(1);
+}
+
+.standings-preview__row:hover {
+  background: color-mix(in srgb, var(--team-color, var(--color-f1-red)) 8%, transparent);
+  padding-left: var(--space-5);
+  transform: translateX(2px);
+}
+
+.race-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.race-card::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(225, 6, 0, 0.25), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out-expo);
+  pointer-events: none;
+}
+
+.race-card:hover::after {
+  opacity: 1;
+}
+
+.race-card[data-status="next"] {
+  border-color: rgba(225, 6, 0, 0.35);
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.12);
+}
+
+.race-card[data-status="next"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-red);
+  z-index: 2;
+  box-shadow: 0 0 14px rgba(225, 6, 0, 0.5);
+}
+
+.race-card[data-status="done"] {
+  opacity: 0.78;
+}
+
+.race-card[data-status="done"]:hover {
+  opacity: 1;
+}
+
+.tabs {
+  position: relative;
+}
+
+.tab[aria-selected="true"] {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .page-header h1 {
+    animation: none;
+    background: none;
+    color: var(--color-text-primary);
+    -webkit-text-fill-color: var(--color-text-primary);
+  }
+  .btn::before,
+  .card::after {
+    display: none;
+  }
+}

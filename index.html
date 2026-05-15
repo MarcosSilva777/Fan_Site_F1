@@ -24,14 +24,21 @@
 
   <main id="main-content" class="main">
     <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__bg" aria-hidden="true"></div>
       <div class="container">
-        <div class="hero__content fade-up">
-          <span class="hero__eyebrow">Temporada 2026 · Fórmula 1</span>
+        <div class="hero__content">
+          <span class="hero__eyebrow">Temporada 2026 · Ao vivo</span>
           <h1 class="hero__title" id="hero-title">A velocidade <strong>vive aqui.</strong></h1>
           <p class="hero__lead">Acompanhe o calendário completo, classificações em tempo real, perfis detalhados de pilotos e equipes. Tudo o que um verdadeiro fã da F1 precisa, em um só lugar.</p>
           <div class="hero__cta">
-            <a class="btn btn-primary btn-arrow" href="./pages/calendario.html">Ver calendário</a>
-            <a class="btn btn-ghost" href="./pages/classificacoes.html">Classificações</a>
+            <a class="btn btn-primary btn-arrow btn-lg" href="./pages/calendario.html">Ver calendário</a>
+            <a class="btn btn-ghost btn-lg" href="./pages/classificacoes.html">Classificações</a>
+          </div>
+          <div class="hero__meta">
+            <div class="hero__meta-item">Corridas<strong>24</strong></div>
+            <div class="hero__meta-item">Equipes<strong>11</strong></div>
+            <div class="hero__meta-item">Pilotos<strong>22</strong></div>
+            <div class="hero__meta-item">Países<strong>21</strong></div>
           </div>
         </div>
       </div>
@@ -39,10 +46,13 @@
 
     <section class="section" aria-labelledby="next-race-title">
       <div class="container">
-        <header class="section-title">
-          <h2 id="next-race-title">Próxima corrida</h2>
+        <header class="section-title" data-reveal="up">
+          <div>
+            <span class="section-title__eyebrow">A caminho da grid</span>
+            <h2 id="next-race-title">Próxima corrida</h2>
+          </div>
         </header>
-        <div id="next-race" class="fade-up">
+        <div id="next-race" data-reveal="up">
           <div class="next-race"><div class="loading-block"><span class="loading"></span> Carregando próxima corrida…</div></div>
         </div>
       </div>
@@ -50,14 +60,17 @@
 
     <section class="section" aria-labelledby="standings-title" style="padding-top: 0;">
       <div class="container">
-        <header class="section-title">
-          <h2 id="standings-title">No topo do campeonato</h2>
+        <header class="section-title" data-reveal="up">
+          <div>
+            <span class="section-title__eyebrow">Liderança · 2026</span>
+            <h2 id="standings-title">No topo do campeonato</h2>
+          </div>
         </header>
-        <div class="standings-preview">
+        <div class="standings-preview" data-reveal-stagger>
           <div class="card" style="padding: var(--space-6);">
             <h3 class="standings-preview__title">
               Pilotos
-              <a class="text-secondary" href="./pages/classificacoes.html" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.1em;">Ver tudo →</a>
+              <a class="text-secondary" href="./pages/classificacoes.html" style="font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tracking-wider); font-weight: var(--fw-bold);">Ver tudo →</a>
             </h3>
             <div id="drivers-top" class="standings-preview__list">
               <div class="loading-block"><span class="loading"></span> Carregando…</div>
@@ -66,7 +79,7 @@
           <div class="card" style="padding: var(--space-6);">
             <h3 class="standings-preview__title">
               Construtores
-              <a class="text-secondary" href="./pages/classificacoes.html?tab=construtores" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.1em;">Ver tudo →</a>
+              <a class="text-secondary" href="./pages/classificacoes.html?tab=construtores" style="font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tracking-wider); font-weight: var(--fw-bold);">Ver tudo →</a>
             </h3>
             <div id="constructors-top" class="standings-preview__list">
               <div class="loading-block"><span class="loading"></span> Carregando…</div>
@@ -78,21 +91,24 @@
 
     <section class="section" aria-labelledby="explore-title" style="padding-top: 0;">
       <div class="container">
-        <header class="section-title">
-          <h2 id="explore-title">Explore</h2>
+        <header class="section-title" data-reveal="up">
+          <div>
+            <span class="section-title__eyebrow">Vá mais fundo</span>
+            <h2 id="explore-title">Explore</h2>
+          </div>
         </header>
-        <div class="standings-preview">
-          <a class="card" href="./pages/pilotos.html" style="padding: var(--space-8); display: block;">
+        <div class="standings-preview" data-reveal-stagger>
+          <a class="card explore-card" href="./pages/pilotos.html">
             <span class="badge">Pilotos</span>
-            <h3 style="margin-top: var(--space-4); font-size: var(--fs-2xl);">Conheça os pilotos da temporada</h3>
-            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">Perfis completos, estatísticas de carreira, números, equipes e nacionalidades.</p>
-            <span style="margin-top: var(--space-5); display: inline-block; color: var(--color-f1-red); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm);">Ver pilotos →</span>
+            <h3 class="explore-card__title">Conheça os pilotos da temporada</h3>
+            <p class="explore-card__lead">Perfis completos, estatísticas de carreira, números, equipes e nacionalidades.</p>
+            <span class="explore-card__cta">Ver pilotos</span>
           </a>
-          <a class="card" href="./pages/equipes.html" style="padding: var(--space-8); display: block;">
+          <a class="card explore-card" href="./pages/equipes.html">
             <span class="badge">Equipes</span>
-            <h3 style="margin-top: var(--space-4); font-size: var(--fs-2xl);">As escuderias da F1</h3>
-            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">Histórias, base, motores, pilotos e desempenho de cada equipe na temporada.</p>
-            <span style="margin-top: var(--space-5); display: inline-block; color: var(--color-f1-red); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm);">Ver equipes →</span>
+            <h3 class="explore-card__title">As escuderias da F1</h3>
+            <p class="explore-card__lead">Histórias, base, motores, pilotos e desempenho de cada equipe na temporada.</p>
+            <span class="explore-card__cta">Ver equipes</span>
           </a>
         </div>
       </div>

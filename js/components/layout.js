@@ -129,4 +129,5 @@ export function renderFooter() {
 export function mountLayout() {
   renderHeader();
   renderFooter();
+  import('./animations.js').then((mod) => mod.initAnimations()).catch(() => {});
 }

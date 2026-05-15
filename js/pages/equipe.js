@@ -13,8 +13,23 @@ import {
   formatShortDate,
 } from '../utils/format.js';
 import { getTeamImage, getDriverImage, teamLogoSvg, driverAvatarSvg } from '../api/images.js';
+import { observeReveals, observeCountUp, countUp, reducedMotion } from '../components/animations.js';
+import { loadGsap } from '../components/gsap-loader.js';
 
 mountLayout();
+
+async function animateProfileHero() {
+  if (reducedMotion) return;
+  try {
+    const { gsap } = await loadGsap({ withScrollTrigger: false });
+    if (!gsap) return;
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    tl.from('.profile-hero__eyebrow', { y: 20, opacity: 0, duration: 0.7 })
+      .from('.profile-hero__title', { y: 36, opacity: 0, duration: 1.0, filter: 'blur(10px)' }, '-=0.4')
+      .from('.profile-hero__meta > *', { y: 14, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.6')
+      .from('.team-card__logo', { scale: 0.7, opacity: 0, duration: 1.0, ease: 'back.out(1.7)' }, '-=0.9');
+  } catch {}
+}
 
 const SEASON = new Date().getFullYear();
 const params = new URLSearchParams(window.location.search);
@@ -66,7 +81,7 @@ async function loadTeam() {
                 ${standingRow ? `<div>Vitórias ${SEASON}<strong>${standingRow.wins}</strong></div>` : ''}
               </div>
             </div>
-            <div class="team-card__logo" id="team-logo" style="width: 140px; height: 140px; font-size: var(--fs-3xl); border-width: 3px;">
+            <div class="team-card__logo" id="team-logo" style="width: clamp(180px, 22vw, 260px); height: clamp(180px, 22vw, 260px); font-size: var(--fs-3xl); border-width: 3px;">
               <img src="${teamLogoSvg(team, theme.color)}" alt="${team.name}" loading="eager">
             </div>
           </div>
@@ -76,11 +91,11 @@ async function loadTeam() {
       <section class="section">
         <div class="container">
           <header class="section-title"><h2>Estatísticas</h2></header>
-          <div class="stats-grid">
-            <div class="stat-card"><div class="stat-card__label">Pontos ${SEASON}</div><div class="stat-card__value">${standingRow?.points ?? '—'}</div></div>
-            <div class="stat-card"><div class="stat-card__label">Vitórias ${SEASON}</div><div class="stat-card__value">${standingRow?.wins ?? '—'}</div></div>
+          <div class="stats-grid" data-reveal-stagger>
+            <div class="stat-card"><div class="stat-card__label">Pontos ${SEASON}</div><div class="stat-card__value" data-season-count="${standingRow?.points ?? ''}">${standingRow?.points ?? '—'}</div></div>
+            <div class="stat-card"><div class="stat-card__label">Vitórias ${SEASON}</div><div class="stat-card__value" data-season-count="${standingRow?.wins ?? ''}">${standingRow?.wins ?? '—'}</div></div>
             <div class="stat-card"><div class="stat-card__label">Vitórias na história</div><div class="stat-card__value" data-stat="career-wins"><span class="loading"></span></div></div>
-            <div class="stat-card"><div class="stat-card__label">Pilotos ${SEASON}</div><div class="stat-card__value">${drivers.length || '—'}</div></div>
+            <div class="stat-card"><div class="stat-card__label">Pilotos ${SEASON}</div><div class="stat-card__value" data-season-count="${drivers.length || ''}">${drivers.length || '—'}</div></div>
           </div>
         </div>
       </section>
@@ -120,7 +135,11 @@ async function loadTeam() {
     getTeamImage(team).then((src) => {
       if (!src) return;
       const img = document.querySelector('#team-logo img');
-      if (img) { img.src = src; img.classList.add('team-logo--real'); }
+      if (img) {
+        img.src = src;
+        img.classList.add('team-logo--real');
+        img.dataset.teamId = team.constructorId;
+      }
     });
 
     drivers.forEach((d) => {
@@ -133,11 +152,21 @@ async function loadTeam() {
 
     getConstructorCareerWins(teamId).then((w) => {
       const el = document.querySelector('[data-stat="career-wins"]');
-      if (el) el.textContent = w ?? '—';
+      if (!el) return;
+      if (w === null || w === undefined) { el.textContent = '—'; return; }
+      countUp(el, w, { duration: 1300 });
     }).catch(() => {
       const el = document.querySelector('[data-stat="career-wins"]');
       if (el) el.textContent = '—';
     });
+
+    document.querySelectorAll('[data-season-count]').forEach((el) => {
+      const v = Number(el.dataset.seasonCount);
+      if (Number.isFinite(v)) observeCountUp(el, v, { duration: 1000 });
+    });
+
+    observeReveals(root);
+    animateProfileHero();
   } catch (err) {
     root.innerHTML = `<div class="container section"><div class="error-message">Falha ao carregar equipe: ${err.message}</div></div>`;
   }

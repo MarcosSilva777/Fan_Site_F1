@@ -13,8 +13,23 @@ import {
   countryToFlagUrl,
 } from '../utils/format.js';
 import { getDriverImage, driverAvatarSvg } from '../api/images.js';
+import { observeReveals, reducedMotion } from '../components/animations.js';
 
 mountLayout();
+
+function applyRowStagger(panel) {
+  if (reducedMotion) return;
+  const rows = panel.querySelectorAll('.data-table tbody tr');
+  rows.forEach((tr, i) => {
+    tr.style.opacity = '0';
+    tr.style.transform = 'translateX(-12px)';
+    tr.style.transition = `opacity 480ms var(--ease-out-expo) ${i * 25}ms, transform 480ms var(--ease-out-expo) ${i * 25}ms, background var(--dur-fast) var(--ease-out-quart)`;
+    requestAnimationFrame(() => {
+      tr.style.opacity = '';
+      tr.style.transform = '';
+    });
+  });
+}
 
 const params = new URLSearchParams(window.location.search);
 const season = params.get('season');
@@ -74,7 +89,7 @@ async function loadGP() {
 
       <section class="section" style="padding-top: var(--space-10);">
         <div class="container">
-          <div class="gp-info-grid">
+          <div class="gp-info-grid" data-reveal-stagger>
             <div class="stat-card"><div class="stat-card__label">Data</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${formatDate(race.date)}</div></div>
             <div class="stat-card"><div class="stat-card__label">Horário (corrida)</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${race.time ? formatTime(race.date, race.time) : '—'}</div></div>
             <div class="stat-card"><div class="stat-card__label">Status</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${isPast ? 'Realizada' : 'Programada'}</div></div>
@@ -101,6 +116,8 @@ async function loadGP() {
 
     function renderTab(name) {
       tabs.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+      panel.classList.add('panel-fade-out');
+      setTimeout(() => panel.classList.remove('panel-fade-out'), 220);
       let drivers = [];
       if (name === 'race' && results?.Results?.length) {
         panel.innerHTML = renderRaceResults(results.Results);
@@ -114,6 +131,7 @@ async function loadGP() {
         panel.innerHTML = renderSprint(sprint.SprintResults);
         drivers = sprint.SprintResults.map((r) => r.Driver);
       }
+      applyRowStagger(panel);
       drivers.forEach((d) => {
         getDriverImage(d).then((src) => {
           if (!src) return;
@@ -125,6 +143,8 @@ async function loadGP() {
     tabs.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => renderTab(btn.dataset.tab)));
     const initial = tabs.querySelector('[aria-selected="true"]');
     if (initial) renderTab(initial.dataset.tab);
+
+    observeReveals(root);
   } catch (err) {
     root.innerHTML = `<div class="container section"><div class="error-message">Falha ao carregar GP: ${err.message}</div></div>`;
   }
