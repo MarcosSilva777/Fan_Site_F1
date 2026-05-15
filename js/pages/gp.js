@@ -1,0 +1,236 @@
+import { mountLayout } from '../components/layout.js';
+import {
+  getRace,
+  getRaceResults,
+  getRaceQualifying,
+  getRaceSprint,
+} from '../api/jolpica.js';
+import { teamTheme } from '../data/teams.js';
+import {
+  combineDateTime,
+  formatDate,
+  formatTime,
+  countryToFlagUrl,
+} from '../utils/format.js';
+import { getDriverImage, driverAvatarSvg } from '../api/images.js';
+
+mountLayout();
+
+const params = new URLSearchParams(window.location.search);
+const season = params.get('season');
+const round = params.get('round');
+
+if (!season || !round) {
+  document.getElementById('gp-root').innerHTML = `
+    <div class="container section">
+      <div class="empty-state">
+        <h3>GP não informado</h3>
+        <p><a class="btn btn-ghost" href="./calendario.html">Voltar para o calendário</a></p>
+      </div>
+    </div>
+  `;
+} else {
+  loadGP();
+}
+
+function medalClass(pos) {
+  return ['gold', 'silver', 'bronze'][parseInt(pos, 10) - 1] || '';
+}
+
+async function loadGP() {
+  const root = document.getElementById('gp-root');
+  try {
+    const [base, results, qualifying, sprint] = await Promise.all([
+      getRace(season, round),
+      getRaceResults(season, round).catch(() => null),
+      getRaceQualifying(season, round).catch(() => null),
+      getRaceSprint(season, round).catch(() => null),
+    ]);
+
+    const race = results || qualifying || sprint || base;
+    if (!race) {
+      root.innerHTML = `<div class="container section"><div class="empty-state"><h3>GP não encontrado</h3></div></div>`;
+      return;
+    }
+
+    const start = combineDateTime(race.date, race.time);
+    const flag = countryToFlagUrl(race.Circuit?.Location?.country);
+    const flagHtml = flag ? `<img class="flag" src="${flag}" alt="" loading="lazy" width="28" height="20">` : '';
+    const isPast = start && start.getTime() < Date.now();
+
+    document.title = `${race.raceName} — F1 Fan Site`;
+
+    root.innerHTML = `
+      <header class="page-header">
+        <div class="container">
+          <span class="page-header__eyebrow">Etapa ${race.round} · Temporada ${race.season}</span>
+          <h1>${race.raceName}</h1>
+          <p class="page-header__lead" style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+            ${flagHtml}
+            <span>${race.Circuit?.circuitName ?? ''} — ${race.Circuit?.Location?.locality ?? ''}, ${race.Circuit?.Location?.country ?? ''}</span>
+          </p>
+        </div>
+      </header>
+
+      <section class="section" style="padding-top: var(--space-10);">
+        <div class="container">
+          <div class="gp-info-grid">
+            <div class="stat-card"><div class="stat-card__label">Data</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${formatDate(race.date)}</div></div>
+            <div class="stat-card"><div class="stat-card__label">Horário (corrida)</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${race.time ? formatTime(race.date, race.time) : '—'}</div></div>
+            <div class="stat-card"><div class="stat-card__label">Status</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${isPast ? 'Realizada' : 'Programada'}</div></div>
+            <div class="stat-card"><div class="stat-card__label">Circuito</div><div class="stat-card__value" style="font-size: var(--fs-lg); line-height: 1.2;">${race.Circuit?.Location?.locality ?? '—'}</div></div>
+          </div>
+
+          <div id="gp-tabs" class="tabs" role="tablist" aria-label="Sessões" style="margin-bottom: var(--space-8); flex-wrap: wrap;">
+            ${results?.Results?.length ? `<button class="tab" role="tab" aria-selected="true" data-tab="race">Corrida</button>` : ''}
+            ${qualifying?.QualifyingResults?.length ? `<button class="tab" role="tab" aria-selected="${!results?.Results?.length}" data-tab="qualifying">Qualificação</button>` : ''}
+            ${sprint?.SprintResults?.length ? `<button class="tab" role="tab" aria-selected="false" data-tab="sprint">Sprint</button>` : ''}
+          </div>
+
+          <div id="gp-panel">
+            ${(!results?.Results?.length && !qualifying?.QualifyingResults?.length && !sprint?.SprintResults?.length)
+              ? `<div class="empty-state"><h3>Resultados ainda não disponíveis</h3><p>Esta corrida ainda não foi disputada ou os dados ainda não foram publicados.</p></div>`
+              : ''}
+          </div>
+        </div>
+      </section>
+    `;
+
+    const tabs = document.getElementById('gp-tabs');
+    const panel = document.getElementById('gp-panel');
+
+    function renderTab(name) {
+      tabs.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+      let drivers = [];
+      if (name === 'race' && results?.Results?.length) {
+        panel.innerHTML = renderRaceResults(results.Results);
+        drivers = results.Results.map((r) => r.Driver);
+      }
+      if (name === 'qualifying' && qualifying?.QualifyingResults?.length) {
+        panel.innerHTML = renderQualifying(qualifying.QualifyingResults);
+        drivers = qualifying.QualifyingResults.map((r) => r.Driver);
+      }
+      if (name === 'sprint' && sprint?.SprintResults?.length) {
+        panel.innerHTML = renderSprint(sprint.SprintResults);
+        drivers = sprint.SprintResults.map((r) => r.Driver);
+      }
+      drivers.forEach((d) => {
+        getDriverImage(d).then((src) => {
+          if (!src) return;
+          panel.querySelectorAll(`[data-driver-avatar="${d.driverId}"]`).forEach((img) => { img.src = src; });
+        });
+      });
+    }
+
+    tabs.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => renderTab(btn.dataset.tab)));
+    const initial = tabs.querySelector('[aria-selected="true"]');
+    if (initial) renderTab(initial.dataset.tab);
+  } catch (err) {
+    root.innerHTML = `<div class="container section"><div class="error-message">Falha ao carregar GP: ${err.message}</div></div>`;
+  }
+}
+
+function renderRaceResults(rows) {
+  return `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Pos</th><th>Piloto</th><th>Equipe</th><th class="text-center">Grid</th><th class="text-center">Voltas</th><th>Tempo / Status</th><th class="text-right">Pts</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((res) => {
+            const team = res.Constructor;
+            const theme = teamTheme(team?.constructorId);
+            const avatar = driverAvatarSvg(res.Driver, theme.color);
+            return `
+              <tr style="--team-color: ${theme.color};">
+                <td><span class="position-pill ${medalClass(res.position)}">${res.position}</span></td>
+                <td>
+                  <a href="./piloto.html?id=${res.Driver.driverId}" class="avatar-stack" style="color: var(--color-text-primary); font-weight: var(--fw-bold);">
+                    <img class="avatar avatar-sm" src="${avatar}" data-driver-avatar="${res.Driver.driverId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
+                    <span>${res.Driver.givenName} ${res.Driver.familyName}</span>
+                    <span class="text-muted text-mono" style="font-size: var(--fs-xs);">#${res.number}</span>
+                  </a>
+                </td>
+                <td><span class="standings-row__team">${team?.name ?? ''}</span></td>
+                <td class="text-center text-mono">${res.grid}</td>
+                <td class="text-center text-mono">${res.laps}</td>
+                <td class="text-mono" style="font-size: var(--fs-sm);">${res.Time?.time ?? res.status ?? '—'}</td>
+                <td class="text-right"><strong style="font-family: var(--font-display); font-weight: var(--fw-black);">${res.points}</strong></td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderQualifying(rows) {
+  return `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Pos</th><th>Piloto</th><th>Equipe</th><th class="text-mono text-center">Q1</th><th class="text-mono text-center">Q2</th><th class="text-mono text-center">Q3</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((res) => {
+            const team = res.Constructor;
+            const theme = teamTheme(team?.constructorId);
+            const avatar = driverAvatarSvg(res.Driver, theme.color);
+            return `
+              <tr style="--team-color: ${theme.color};">
+                <td><span class="position-pill ${medalClass(res.position)}">${res.position}</span></td>
+                <td>
+                  <a href="./piloto.html?id=${res.Driver.driverId}" class="avatar-stack" style="color: var(--color-text-primary); font-weight: var(--fw-bold);">
+                    <img class="avatar avatar-sm" src="${avatar}" data-driver-avatar="${res.Driver.driverId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
+                    <span>${res.Driver.givenName} ${res.Driver.familyName}</span>
+                  </a>
+                </td>
+                <td><span class="standings-row__team">${team?.name ?? ''}</span></td>
+                <td class="text-mono text-center">${res.Q1 ?? '—'}</td>
+                <td class="text-mono text-center">${res.Q2 ?? '—'}</td>
+                <td class="text-mono text-center">${res.Q3 ?? '—'}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderSprint(rows) {
+  return `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Pos</th><th>Piloto</th><th>Equipe</th><th class="text-center">Grid</th><th class="text-center">Voltas</th><th>Tempo / Status</th><th class="text-right">Pts</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((res) => {
+            const team = res.Constructor;
+            const theme = teamTheme(team?.constructorId);
+            const avatar = driverAvatarSvg(res.Driver, theme.color);
+            return `
+              <tr style="--team-color: ${theme.color};">
+                <td><span class="position-pill ${medalClass(res.position)}">${res.position}</span></td>
+                <td>
+                  <a href="./piloto.html?id=${res.Driver.driverId}" class="avatar-stack" style="color: var(--color-text-primary); font-weight: var(--fw-bold);">
+                    <img class="avatar avatar-sm" src="${avatar}" data-driver-avatar="${res.Driver.driverId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
+                    <span>${res.Driver.givenName} ${res.Driver.familyName}</span>
+                  </a>
+                </td>
+                <td><span class="standings-row__team">${team?.name ?? ''}</span></td>
+                <td class="text-center text-mono">${res.grid}</td>
+                <td class="text-center text-mono">${res.laps}</td>
+                <td class="text-mono" style="font-size: var(--fs-sm);">${res.Time?.time ?? res.status ?? '—'}</td>
+                <td class="text-right"><strong>${res.points}</strong></td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}

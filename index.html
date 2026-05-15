@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1 Fan Site — Tudo sobre Fórmula 1 em um só lugar</title>
+  <meta name="description" content="O fan site definitivo de Fórmula 1: calendário 2026, classificações ao vivo, perfis completos de pilotos e equipes. Atualizado em tempo real.">
+  <meta name="theme-color" content="#e10600">
+  <meta property="og:title" content="F1 Fan Site — Tudo sobre Fórmula 1">
+  <meta property="og:description" content="Calendário 2026, classificações ao vivo, perfis de pilotos e equipes. O melhor fan site de F1.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.jolpi.ca">
+  <link rel="preconnect" href="https://api.openf1.org">
+  <link rel="preconnect" href="https://flagcdn.com">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e10600'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial' font-weight='900' font-size='28' fill='white'%3EF1%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main id="main-content" class="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container">
+        <div class="hero__content fade-up">
+          <span class="hero__eyebrow">Temporada 2026 · Fórmula 1</span>
+          <h1 class="hero__title" id="hero-title">A velocidade <strong>vive aqui.</strong></h1>
+          <p class="hero__lead">Acompanhe o calendário completo, classificações em tempo real, perfis detalhados de pilotos e equipes. Tudo o que um verdadeiro fã da F1 precisa, em um só lugar.</p>
+          <div class="hero__cta">
+            <a class="btn btn-primary btn-arrow" href="./pages/calendario.html">Ver calendário</a>
+            <a class="btn btn-ghost" href="./pages/classificacoes.html">Classificações</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="next-race-title">
+      <div class="container">
+        <header class="section-title">
+          <h2 id="next-race-title">Próxima corrida</h2>
+        </header>
+        <div id="next-race" class="fade-up">
+          <div class="next-race"><div class="loading-block"><span class="loading"></span> Carregando próxima corrida…</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="standings-title" style="padding-top: 0;">
+      <div class="container">
+        <header class="section-title">
+          <h2 id="standings-title">No topo do campeonato</h2>
+        </header>
+        <div class="standings-preview">
+          <div class="card" style="padding: var(--space-6);">
+            <h3 class="standings-preview__title">
+              Pilotos
+              <a class="text-secondary" href="./pages/classificacoes.html" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.1em;">Ver tudo →</a>
+            </h3>
+            <div id="drivers-top" class="standings-preview__list">
+              <div class="loading-block"><span class="loading"></span> Carregando…</div>
+            </div>
+          </div>
+          <div class="card" style="padding: var(--space-6);">
+            <h3 class="standings-preview__title">
+              Construtores
+              <a class="text-secondary" href="./pages/classificacoes.html?tab=construtores" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.1em;">Ver tudo →</a>
+            </h3>
+            <div id="constructors-top" class="standings-preview__list">
+              <div class="loading-block"><span class="loading"></span> Carregando…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="explore-title" style="padding-top: 0;">
+      <div class="container">
+        <header class="section-title">
+          <h2 id="explore-title">Explore</h2>
+        </header>
+        <div class="standings-preview">
+          <a class="card" href="./pages/pilotos.html" style="padding: var(--space-8); display: block;">
+            <span class="badge">Pilotos</span>
+            <h3 style="margin-top: var(--space-4); font-size: var(--fs-2xl);">Conheça os pilotos da temporada</h3>
+            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">Perfis completos, estatísticas de carreira, números, equipes e nacionalidades.</p>
+            <span style="margin-top: var(--space-5); display: inline-block; color: var(--color-f1-red); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm);">Ver pilotos →</span>
+          </a>
+          <a class="card" href="./pages/equipes.html" style="padding: var(--space-8); display: block;">
+            <span class="badge">Equipes</span>
+            <h3 style="margin-top: var(--space-4); font-size: var(--fs-2xl);">As escuderias da F1</h3>
+            <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">Histórias, base, motores, pilotos e desempenho de cada equipe na temporada.</p>
+            <span style="margin-top: var(--space-5); display: inline-block; color: var(--color-f1-red); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: 0.1em; font-size: var(--fs-sm);">Ver equipes →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script type="module" src="./js/pages/home.js"></script>
+</body>
+</html>
