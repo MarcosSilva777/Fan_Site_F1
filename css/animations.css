@@ -124,7 +124,7 @@
 }
 
 .driver-card:hover .driver-card__bg-number {
-  opacity: 0.32 !important;
+  opacity: 0.6;
   transform: translateY(-6px) scale(1.04);
 }
 

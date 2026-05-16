@@ -512,10 +512,6 @@
   pointer-events: none;
 }
 
-.driver-card:has(.driver-card__photo) .driver-card__bg-number {
-  opacity: 0.16;
-  z-index: 0;
-}
 
 .driver-card:hover { color: inherit; }
 
@@ -527,12 +523,18 @@
   font-weight: var(--fw-regular);
   font-size: 13rem;
   line-height: 0.85;
-  color: transparent;
-  -webkit-text-stroke: 2px var(--team-color, var(--color-border));
+  color: var(--team-color, var(--color-border));
+  -webkit-text-stroke: 1px var(--team-color, var(--color-border));
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 12px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 0, 0, 0.5),
+    2px 2px 0 rgba(0, 0, 0, 0.6),
+    -2px -2px 0 rgba(0, 0, 0, 0.6);
   pointer-events: none;
   user-select: none;
   letter-spacing: -0.04em;
-  opacity: 0.55;
+  opacity: 0.45;
   font-variant-numeric: tabular-nums;
 }
 

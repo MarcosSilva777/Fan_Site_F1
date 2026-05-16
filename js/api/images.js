@@ -28,6 +28,22 @@ const DRIVER_WIKI_TITLE = {
   lawson: 'Liam_Lawson',
   colapinto: 'Franco_Colapinto',
   lindblad: 'Arvid_Lindblad',
+  bottas: 'Valtteri_Bottas',
+};
+
+const CACHE_BUST_VERSION = 'v4';
+const CACHE_BUST_KEY = 'f1fs::img-bust';
+if (localStorage.getItem(CACHE_BUST_KEY) !== CACHE_BUST_VERSION) {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith('f1fs::wiki::'))
+    .forEach((k) => localStorage.removeItem(k));
+  localStorage.setItem(CACHE_BUST_KEY, CACHE_BUST_VERSION);
+}
+
+const DRIVER_IMAGE_OVERRIDE = {
+  perez: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/2024-08-25_Motorsport%2C_Formel_1%2C_Gro%C3%9Fer_Preis_der_Niederlande_2024_STP_3758_by_Stepro_%28cropped%29.jpg/500px-2024-08-25_Motorsport%2C_Formel_1%2C_Gro%C3%9Fer_Preis_der_Niederlande_2024_STP_3758_by_Stepro_%28cropped%29.jpg',
+  alonso: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/2025_Japan_GP_-_Aston_Martin_-_Fernando_Alonso_-_Fanzone_Stage_%28cropped%29.jpg/500px-2025_Japan_GP_-_Aston_Martin_-_Fernando_Alonso_-_Fanzone_Stage_%28cropped%29.jpg',
+  bortoleto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Gabriel_Bortoleto_%28cropped%29.jpg/500px-Gabriel_Bortoleto_%28cropped%29.jpg',
 };
 
 function titleFromWikiUrl(url) {
@@ -62,6 +78,7 @@ async function fetchSummary(title) {
 
 export async function getDriverImage(driver) {
   if (!driver) return null;
+  if (DRIVER_IMAGE_OVERRIDE[driver.driverId]) return DRIVER_IMAGE_OVERRIDE[driver.driverId];
   const overrideTitle = DRIVER_WIKI_TITLE[driver.driverId];
   const titles = [];
   if (overrideTitle) titles.push(overrideTitle);

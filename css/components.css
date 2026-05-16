@@ -352,6 +352,17 @@
 .avatar-sm { width: 32px; height: 32px; }
 .avatar-md { width: 48px; height: 48px; }
 .avatar-lg { width: 80px; height: 80px; border-width: 3px; }
+.avatar--standings {
+  width: 56px;
+  height: 56px;
+  border-width: 3px;
+  box-shadow: var(--shadow-sm);
+  object-position: center 20%;
+}
+
+.avatar--standings[data-driver-avatar="bottas"] {
+  object-position: center 30%;
+}
 
 .team-logo-avatar {
   width: 40px;
@@ -364,9 +375,21 @@
   padding: 4px;
 }
 
+.team-logo-avatar--standings {
+  width: 56px;
+  height: 56px;
+  border-width: 3px;
+  padding: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
 .team-logo-avatar--real {
   background: #ffffff;
   padding: 3px;
+}
+
+.team-logo-avatar--standings.team-logo-avatar--real {
+  padding: 5px;
 }
 
 .team-logo-avatar--real[data-team-logo="mclaren"],

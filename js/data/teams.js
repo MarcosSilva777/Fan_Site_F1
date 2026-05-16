@@ -40,13 +40,13 @@ export const TEAM_THEME = {
     cssVar: '--team-rb',
   },
   audi: {
-    color: '#52e252',
-    colorDim: 'rgba(82, 226, 82, 0.15)',
+    color: '#bb0a14',
+    colorDim: 'rgba(187, 10, 20, 0.18)',
     cssVar: '--team-audi',
   },
   sauber: {
-    color: '#52e252',
-    colorDim: 'rgba(82, 226, 82, 0.15)',
+    color: '#bb0a14',
+    colorDim: 'rgba(187, 10, 20, 0.18)',
     cssVar: '--team-audi',
   },
   alpine: {

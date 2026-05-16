@@ -55,7 +55,7 @@ function renderDrivers(rows) {
                 <td><span class="position-pill ${medalClass(row.position)}">${row.position}</span></td>
                 <td>
                   <a href="${driverHref}" class="avatar-stack">
-                    <img class="avatar" src="${avatar}" data-driver-avatar="${d.driverId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
+                    <img class="avatar avatar--standings" src="${avatar}" data-driver-avatar="${d.driverId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
                     ${flagHtml}
                     <strong style="color: var(--color-text-primary);">${d.givenName} ${d.familyName}</strong>
                     <span style="color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--fs-sm);">#${d.permanentNumber ?? ''}</span>
@@ -102,7 +102,7 @@ function renderConstructors(rows) {
                 <td><span class="position-pill ${medalClass(row.position)}">${row.position}</span></td>
                 <td>
                   <a href="${teamHref}" class="avatar-stack">
-                    <img class="team-logo-avatar" src="${logo}" data-team-logo="${team.constructorId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
+                    <img class="team-logo-avatar team-logo-avatar--standings" src="${logo}" data-team-logo="${team.constructorId}" alt="" loading="lazy" style="--team-color: ${theme.color};">
                     <span class="standings-row__team" style="color: var(--color-text-primary);">${team?.name ?? '—'}</span>
                   </a>
                 </td>
