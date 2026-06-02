@@ -83,6 +83,33 @@
   box-shadow: var(--shadow-lg);
 }
 
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: soft-light;
+  transition: opacity var(--transition-base);
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--team-color, var(--color-f1-red)) 70%, white) 0%,
+    transparent 55%
+  );
+  z-index: 3;
+}
+
+.card:hover::after {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card::after {
+    display: none;
+  }
+}
+
 .card-team-bar {
   position: absolute;
   inset: 0 0 auto 0;
@@ -463,3 +490,73 @@
 .text-uppercase { text-transform: uppercase; letter-spacing: var(--tracking-wide); }
 .text-display { font-family: var(--font-display); font-weight: var(--fw-regular); }
 .text-numeric { font-variant-numeric: tabular-nums; }
+
+/* ===== Widget ao vivo ===== */
+.live-widget {
+  margin: var(--space-6) 0 0;
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-md);
+}
+
+.live-widget__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.live-widget__session {
+  font-family: var(--font-heading);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-secondary);
+}
+
+.live-widget__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.live-widget__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-card);
+  border-left: 3px solid var(--team-color, var(--color-f1-red));
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+}
+
+.live-widget__pos {
+  font-family: var(--font-display);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-md);
+  min-width: 1.5em;
+  text-align: center;
+  color: var(--color-text-primary);
+}
+
+.live-widget__acr {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-bold);
+  color: var(--team-color, var(--color-text-primary));
+}
+
+.live-widget__name {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

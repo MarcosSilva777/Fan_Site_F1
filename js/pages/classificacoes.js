@@ -142,7 +142,12 @@ async function load() {
             });
           });
         })
-        .catch((err) => { panel.innerHTML = `<div class="error-message">${err.message}</div>`; });
+        .catch(() => { panel.innerHTML = `
+          <div class="empty-state">
+            <h3>Classificação indisponível</h3>
+            <p>Não foi possível carregar agora. Tente novamente em instantes.</p>
+            <button class="btn btn-ghost" type="button" onclick="window.location.reload()">Tentar de novo</button>
+          </div>`; });
     } else {
       getConstructorStandings(SEASON)
         .then((rows) => {
@@ -156,7 +161,12 @@ async function load() {
             });
           });
         })
-        .catch((err) => { panel.innerHTML = `<div class="error-message">${err.message}</div>`; });
+        .catch(() => { panel.innerHTML = `
+          <div class="empty-state">
+            <h3>Classificação indisponível</h3>
+            <p>Não foi possível carregar agora. Tente novamente em instantes.</p>
+            <button class="btn btn-ghost" type="button" onclick="window.location.reload()">Tentar de novo</button>
+          </div>`; });
     }
   }
 

@@ -1,5 +1,5 @@
 import { mountLayout } from '../components/layout.js';
-import { getSeasonRaces } from '../api/jolpica.js';
+import { getCalendar } from '../api/f1.js';
 import {
   combineDateTime,
   formatDay,
@@ -97,7 +97,7 @@ async function load() {
   const filterHost = document.getElementById('calendar-filter');
 
   try {
-    const races = await getSeasonRaces(SEASON);
+    const races = await getCalendar(SEASON);
     if (!races.length) {
       grid.innerHTML = `<div class="empty-state"><h3>Nenhuma corrida encontrada</h3><p>Tente novamente em alguns instantes.</p></div>`;
       return;
@@ -133,8 +133,14 @@ async function load() {
         }
       });
     });
-  } catch (err) {
-    grid.innerHTML = `<div class="error-message">Falha ao carregar o calendário: ${err.message}</div>`;
+  } catch {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3>Não foi possível carregar o calendário</h3>
+        <p>Os dados estão indisponíveis no momento. Tente novamente em instantes.</p>
+        <button class="btn btn-ghost" type="button" onclick="window.location.reload()">Tentar de novo</button>
+      </div>
+    `;
   }
 }
 

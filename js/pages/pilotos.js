@@ -83,8 +83,14 @@ async function load() {
     observeReveals(grid);
     attachCardHoverTracking(grid);
     hydrateDriverPhotos(cards);
-  } catch (err) {
-    grid.innerHTML = `<div class="error-message">Falha ao carregar pilotos: ${err.message}</div>`;
+  } catch {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3>Não foi possível carregar os pilotos</h3>
+        <p>Os dados estão indisponíveis no momento. Tente novamente em instantes.</p>
+        <button class="btn btn-ghost" type="button" onclick="window.location.reload()">Tentar de novo</button>
+      </div>
+    `;
   }
 }
 

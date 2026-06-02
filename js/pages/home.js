@@ -1,10 +1,6 @@
 import { mountLayout } from '../components/layout.js';
-import {
-  getNextRace,
-  getDriverStandings,
-  getConstructorStandings,
-  getSeasonRaces,
-} from '../api/jolpica.js';
+import { getDriverStandings, getConstructorStandings } from '../api/jolpica.js';
+import { getNextRace, getCalendar } from '../api/f1.js';
 import {
   combineDateTime,
   timeUntil,
@@ -16,8 +12,12 @@ import {
 import { teamTheme } from '../data/teams.js';
 import { observeReveals, observeCountUp, reducedMotion } from '../components/animations.js';
 import { loadGsap } from '../components/gsap-loader.js';
+import { mountLiveWidget } from '../components/live-widget.js';
 
 mountLayout();
+
+const eyebrowEl = document.getElementById('hero-eyebrow');
+if (eyebrowEl) eyebrowEl.textContent = `Temporada ${new Date().getFullYear()}`;
 
 function revealHero() {
   const content = document.querySelector('.hero__content');
@@ -44,18 +44,7 @@ const SEASON = new Date().getFullYear();
 
 async function resolveNextRace() {
   try {
-    const next = await getNextRace();
-    if (next) return next;
-  } catch {
-    // fallback abaixo
-  }
-  try {
-    const races = await getSeasonRaces(SEASON);
-    const now = Date.now();
-    return races.find((r) => {
-      const start = combineDateTime(r.date, r.time);
-      return start && start.getTime() > now;
-    }) ?? null;
+    return await getNextRace(SEASON);
   } catch {
     return null;
   }
@@ -202,21 +191,63 @@ function hookCountUpPoints(container) {
   });
 }
 
+function updateHeroStat(key, value) {
+  if (!Number.isFinite(value) || value <= 0) return;
+  const el = document.querySelector(`[data-hero-stat="${key}"]`);
+  if (!el) return;
+  if (reducedMotion) {
+    el.textContent = String(value);
+    return;
+  }
+  observeCountUp(el, value, { duration: 1400 });
+}
+
+async function loadHeroStats() {
+  try {
+    const races = await getCalendar(SEASON);
+    if (races.length) {
+      updateHeroStat('races', races.length);
+      const countries = new Set(
+        races.map((r) => r.Circuit?.Location?.country).filter(Boolean)
+      );
+      updateHeroStat('countries', countries.size);
+    }
+  } catch {
+    // mantém números estáticos
+  }
+}
+
 async function loadHome() {
   const nextRaceEl = document.getElementById('next-race');
   const driversEl = document.getElementById('drivers-top');
   const teamsEl = document.getElementById('constructors-top');
 
   resolveNextRace().then((race) => renderNextRace(nextRaceEl, race));
+  loadHeroStats();
+
+  const liveEl = document.getElementById('live-widget');
+  if (liveEl) {
+    mountLiveWidget(liveEl, {
+      onLive: () => {
+        if (eyebrowEl) eyebrowEl.textContent = `Temporada ${SEASON} · Ao vivo`;
+      },
+    }).catch(() => {});
+  }
 
   getDriverStandings(SEASON)
-    .then((s) => renderDriverStandings(driversEl, s))
+    .then((s) => {
+      renderDriverStandings(driversEl, s);
+      updateHeroStat('drivers', s.length);
+    })
     .catch(() => {
       driversEl.innerHTML = '<p class="error-message">Não foi possível carregar a classificação.</p>';
     });
 
   getConstructorStandings(SEASON)
-    .then((s) => renderConstructorStandings(teamsEl, s))
+    .then((s) => {
+      renderConstructorStandings(teamsEl, s);
+      updateHeroStat('teams', s.length);
+    })
     .catch(() => {
       teamsEl.innerHTML = '<p class="error-message">Não foi possível carregar a classificação.</p>';
     });

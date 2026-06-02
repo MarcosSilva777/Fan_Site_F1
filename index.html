@@ -23,11 +23,12 @@
   <div id="site-header"></div>
 
   <main id="main-content" class="main">
+    <div id="live-widget"></div>
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container">
         <div class="hero__content">
-          <span class="hero__eyebrow">Temporada 2026 · Ao vivo</span>
+          <span class="hero__eyebrow" id="hero-eyebrow">Temporada 2026</span>
           <h1 class="hero__title" id="hero-title">A velocidade <strong>vive aqui.</strong></h1>
           <p class="hero__lead">Acompanhe o calendário completo, classificações em tempo real, perfis detalhados de pilotos e equipes. Tudo o que um verdadeiro fã da F1 precisa, em um só lugar.</p>
           <div class="hero__cta">
@@ -35,10 +36,10 @@
             <a class="btn btn-ghost btn-lg" href="./pages/classificacoes.html">Classificações</a>
           </div>
           <div class="hero__meta">
-            <div class="hero__meta-item">Corridas<strong>24</strong></div>
-            <div class="hero__meta-item">Equipes<strong>11</strong></div>
-            <div class="hero__meta-item">Pilotos<strong>22</strong></div>
-            <div class="hero__meta-item">Países<strong>21</strong></div>
+            <div class="hero__meta-item">Corridas<strong data-hero-stat="races">24</strong></div>
+            <div class="hero__meta-item">Equipes<strong data-hero-stat="teams">11</strong></div>
+            <div class="hero__meta-item">Pilotos<strong data-hero-stat="drivers">22</strong></div>
+            <div class="hero__meta-item">Países<strong data-hero-stat="countries">21</strong></div>
           </div>
         </div>
       </div>

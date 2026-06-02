@@ -4,6 +4,7 @@ const NAV_ITEMS = [
   { href: '/pages/classificacoes.html', label: 'Classificações', match: ['/pages/classificacoes.html'] },
   { href: '/pages/pilotos.html', label: 'Pilotos', match: ['/pages/pilotos.html', '/pages/piloto.html'] },
   { href: '/pages/equipes.html', label: 'Equipes', match: ['/pages/equipes.html', '/pages/equipe.html'] },
+  { href: '/pages/comparar.html', label: 'Comparar', match: ['/pages/comparar.html'] },
 ];
 
 function currentPath() {

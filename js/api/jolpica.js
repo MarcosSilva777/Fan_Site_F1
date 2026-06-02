@@ -1,4 +1,6 @@
-import { getCache, setCache } from '../utils/cache.js';
+import { getCache, setCache, getStaleCache } from '../utils/cache.js';
+import { fetchJson } from './http.js';
+import { reportDataStatus } from '../components/data-status.js';
 
 const BASE_URL = 'https://api.jolpi.ca/ergast/f1';
 const TTL_SHORT = 1000 * 60 * 15;
@@ -9,14 +11,19 @@ async function request(path, { ttl = TTL_LONG } = {}) {
   const cached = getCache(cacheKey);
   if (cached) return cached;
 
-  const url = `${BASE_URL}${path}`;
-  const res = await fetch(url, { headers: { Accept: 'application/json' } });
-  if (!res.ok) {
-    throw new Error(`Jolpica API ${res.status}: ${res.statusText}`);
+  try {
+    const data = await fetchJson(`${BASE_URL}${path}`, { timeoutMs: 7000, retries: 1 });
+    setCache(cacheKey, data, ttl);
+    return data;
+  } catch (err) {
+    const stale = getStaleCache(cacheKey);
+    if (stale != null) {
+      reportDataStatus('stale');
+      return stale;
+    }
+    reportDataStatus('down');
+    throw err;
   }
-  const data = await res.json();
-  setCache(cacheKey, data, ttl);
-  return data;
 }
 
 function currentSeason() {

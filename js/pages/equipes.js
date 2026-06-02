@@ -91,8 +91,14 @@ async function load() {
       if (Number.isFinite(target)) observeCountUp(el, target, { duration: 1300 });
     });
     hydrateTeamLogos(cards);
-  } catch (err) {
-    grid.innerHTML = `<div class="error-message">Falha ao carregar equipes: ${err.message}</div>`;
+  } catch {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3>Não foi possível carregar as equipes</h3>
+        <p>Os dados estão indisponíveis no momento. Tente novamente em instantes.</p>
+        <button class="btn btn-ghost" type="button" onclick="window.location.reload()">Tentar de novo</button>
+      </div>
+    `;
   }
 }
 

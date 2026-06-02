@@ -16,7 +16,11 @@ Calendário ao vivo, classificações de pilotos e construtores, perfis completo
 | 🧑‍🚀 **Pilotos** | Grid completo + perfil individual com bio, número, equipe, estatísticas de carreira (vitórias, pódios, poles) e resultados da temporada |
 | 🏁 **Equipes** | Grid de construtores + perfil com pilotos, classificação atual e histórico de vitórias |
 | 🏎️ **GP** | Página detalhada de cada corrida com resultados de **Corrida**, **Qualificação** e **Sprint** (quando houver) |
+| ⚔️ **Comparar** | Comparador de pilotos lado a lado: pontos, vitórias, pódios, poles e GPs de carreira, com destaque pro melhor de cada estatística. Link compartilhável (`?a=&b=`) |
+| 🔴 **Ao vivo** | Durante uma sessão em andamento, um widget na home mostra as posições em tempo real via **OpenF1**, atualizando sozinho. Some quando não há corrida acontecendo |
+| 🗺️ **Circuito** | Cada GP exibe o traçado oficial da pista, tipo de circuito (permanente/rua) e fuso horário, vindos da **OpenF1** |
 | 📸 **Fotos** | Fotos reais de pilotos e logos de equipes via **Wikipedia API**, com fallback pra avatar SVG estilizado (cor da equipe + iniciais + número) quando não tem foto |
+| 🛡️ **Resiliência** | Camada de API com timeout + retry e **fallback automático pra OpenF1** quando a Jolpica fica fora. O site não trava nem fica em branco: sempre chega a um estado final com mensagem amigável |
 | 📱 **Responsivo** | Mobile-first, testado em todos os breakpoints, com menu hamburguer e tabelas com scroll horizontal |
 | ♿ **Acessível** | Skip link, ARIA, navegação por teclado, contraste WCAG AA, `prefers-reduced-motion` |
 | 🔍 **SEO** | Meta tags completas, Open Graph, sitemap, robots.txt |
@@ -53,10 +57,16 @@ Fan Site - F1/
 │
 ├── js/
 │   ├── api/
+│   │   ├── http.js             # fetch com timeout (AbortController) + retry/backoff
 │   │   ├── jolpica.js          # camada Jolpica F1 (Ergast-compatible)
-│   │   └── openf1.js           # camada OpenF1 (live/telemetria)
+│   │   ├── openf1.js           # camada OpenF1 (live/telemetria)
+│   │   ├── f1.js               # camada unificada: tenta Jolpica → fallback OpenF1
+│   │   └── images.js           # fotos via Wikipedia + avatares SVG
 │   ├── components/
-│   │   └── layout.js           # header e footer dinâmicos
+│   │   ├── layout.js           # header e footer dinâmicos
+│   │   ├── animations.js       # reveals, count-up, transições
+│   │   ├── gsap-loader.js      # carregamento lazy do GSAP
+│   │   └── live-widget.js      # widget de posições ao vivo (OpenF1)
 │   ├── data/
 │   │   └── teams.js            # cores oficiais e helpers de equipe
 │   ├── pages/
@@ -67,7 +77,8 @@ Fan Site - F1/
 │   │   ├── piloto.js
 │   │   ├── equipes.js
 │   │   ├── equipe.js
-│   │   └── gp.js
+│   │   ├── comparar.js         # comparador de pilotos
+│   │   └── gp.js               # detalhe de corrida + traçado do circuito
 │   └── utils/
 │       ├── cache.js            # cache localStorage com TTL
 │       └── format.js           # datas, traduções, bandeiras
@@ -79,6 +90,7 @@ Fan Site - F1/
     ├── piloto.html             # perfil (?id=driverId)
     ├── equipes.html
     ├── equipe.html             # perfil (?id=constructorId)
+    ├── comparar.html           # comparador (?a=driverId&b=driverId)
     ├── gp.html                 # detalhe de corrida (?season=&round=)
     └── 404.html
 ```
@@ -89,27 +101,23 @@ Fan Site - F1/
 
 ⚠️ **Importante:** o projeto usa ES Modules nativos, então **não dá pra abrir o `index.html` direto pelo `file://`** — você precisa servir via HTTP local. Escolha uma opção abaixo:
 
-### Opção 1 — Python (já vem instalado no Windows)
+### Opção 1 — Node.js (recomendado)
 
 Abra o **PowerShell** dentro da pasta do projeto e rode:
+
+```powershell
+npx serve .
+```
+
+Acesse o endereço que aparecer no terminal (algo como **http://localhost:3000**).
+
+### Opção 2 — Python (se você tiver instalado)
 
 ```powershell
 python -m http.server 8000
 ```
 
 Depois acesse: **http://localhost:8000**
-
-### Opção 2 — Node.js (se você tem instalado)
-
-```powershell
-npx serve .
-```
-
-Ou:
-
-```powershell
-npx http-server . -p 8000
-```
 
 ### Opção 3 — VS Code
 
@@ -122,7 +130,7 @@ Instale a extensão **Live Server** e clique com o botão direito em `index.html
 | API | Pra quê | Limite |
 |-----|---------|--------|
 | **[Jolpica F1](https://api.jolpi.ca/ergast/f1/)** | Calendário, pilotos, equipes, classificações, resultados, qualifying, sprint, histórico | Sem chave; uso justo |
-| **[OpenF1](https://api.openf1.org/v1/)** | Dados ao vivo (sessões, telemetria, posições) | 3 req/s no free tier |
+| **[OpenF1](https://api.openf1.org/v1/)** | Dados ao vivo (posições em tempo real), calendário de fallback, traçado e info dos circuitos | 3 req/s no free tier |
 | **[Wikipedia REST](https://en.wikipedia.org/api/rest_v1/)** | Fotos de pilotos e logos de equipes (CC) | Sem chave; cache 7 dias |
 | **[FlagCDN](https://flagcdn.com/)** | Bandeiras dos países | Livre |
 
@@ -142,9 +150,12 @@ Todas as chamadas passam por uma camada de **cache em `localStorage`** com TTL d
 
 ## 🔮 Próximos passos sugeridos
 
-- [ ] Adicionar dados ao vivo durante sessões (OpenF1: posições em tempo real, telemetria)
-- [ ] Página de circuito com mapa e estatísticas históricas
-- [ ] Comparador de pilotos
+- [x] Adicionar dados ao vivo durante sessões (OpenF1: posições em tempo real)
+- [x] Página de circuito com traçado da pista
+- [x] Comparador de pilotos
+- [x] Resiliência de dados (timeout + retry + fallback OpenF1)
+- [ ] Recordes de volta e estatísticas históricas por circuito
+- [ ] Telemetria detalhada durante a sessão (velocidade, setores)
 - [ ] Modo "vivendo a corrida" (stream de eventos do controle de pista)
 - [ ] PWA com offline-first
 

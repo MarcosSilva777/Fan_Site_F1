@@ -167,8 +167,16 @@ async function loadTeam() {
 
     observeReveals(root);
     animateProfileHero();
-  } catch (err) {
-    root.innerHTML = `<div class="container section"><div class="error-message">Falha ao carregar equipe: ${err.message}</div></div>`;
+  } catch {
+    root.innerHTML = `
+      <div class="container section">
+        <div class="empty-state">
+          <h3>Não foi possível carregar a equipe</h3>
+          <p>Os dados estão indisponíveis no momento. Tente novamente em instantes.</p>
+          <a class="btn btn-ghost" href="./equipes.html">Voltar para equipes</a>
+        </div>
+      </div>
+    `;
   }
 }
 

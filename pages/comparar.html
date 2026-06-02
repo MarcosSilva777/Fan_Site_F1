@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparar pilotos — F1 Fan Site</title>
+  <meta name="description" content="Compare dois pilotos da Fórmula 1 lado a lado: pontos, vitórias, pódios, poles e estatísticas de carreira da temporada 2026.">
+  <meta name="theme-color" content="#e10600">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.jolpi.ca">
+  <link rel="preconnect" href="https://flagcdn.com">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e10600'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial' font-weight='900' font-size='28' fill='white'%3EF1%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <main id="main-content" class="main">
+    <header class="page-header">
+      <div class="container">
+        <span class="page-header__eyebrow">Cara a cara</span>
+        <h1>Comparar pilotos</h1>
+        <p class="page-header__lead">Escolha dois pilotos e veja as estatísticas lado a lado: temporada e carreira.</p>
+      </div>
+    </header>
+    <section class="section" style="padding-top: var(--space-8);">
+      <div class="container">
+        <div id="compare-pickers" class="compare-pickers">
+          <div class="loading-block"><span class="loading"></span> Carregando pilotos…</div>
+        </div>
+        <div id="compare-root" class="compare-root"></div>
+      </div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script type="module" src="../js/pages/comparar.js"></script>
+</body>
+</html>

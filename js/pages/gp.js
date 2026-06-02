@@ -5,6 +5,7 @@ import {
   getRaceQualifying,
   getRaceSprint,
 } from '../api/jolpica.js';
+import { getCircuitInfo } from '../api/f1.js';
 import { teamTheme } from '../data/teams.js';
 import {
   combineDateTime,
@@ -12,7 +13,7 @@ import {
   formatTime,
   countryToFlagUrl,
 } from '../utils/format.js';
-import { getDriverImage, driverAvatarSvg } from '../api/images.js';
+import { getDriverImage, driverAvatarSvg, pictureFor } from '../api/images.js';
 import { observeReveals, reducedMotion } from '../components/animations.js';
 
 mountLayout();
@@ -52,6 +53,61 @@ function medalClass(pos) {
   return ['gold', 'silver', 'bronze'][parseInt(pos, 10) - 1] || '';
 }
 
+function circuitTypeLabel(type) {
+  if (!type) return null;
+  const map = { Permanent: 'Permanente', Street: 'De rua', Race: 'Permanente' };
+  return map[type] ?? type;
+}
+
+async function loadCircuit(race) {
+  const mapHost = document.getElementById('circuit-map-host');
+  const infoGrid = document.getElementById('gp-info-grid');
+  if (!mapHost && !infoGrid) return;
+
+  let info = null;
+  try {
+    info = await getCircuitInfo({
+      season: race.season,
+      round: race.round,
+      jolpicaCircuit: race.Circuit,
+    });
+  } catch {
+    return;
+  }
+  if (!info) return;
+
+  if (mapHost && info.circuit_image) {
+    const fallback = info.circuit_image;
+    mapHost.innerHTML = `
+      <figure class="circuit-map" data-reveal="up">
+        ${pictureFor(info.circuit_image, fallback, `Traçado do circuito ${info.circuit_short_name ?? race.Circuit?.circuitName ?? ''}`, 'circuit-map__img')}
+        <figcaption>${race.Circuit?.circuitName ?? info.circuit_short_name ?? ''}</figcaption>
+      </figure>
+    `;
+    observeReveals(mapHost);
+  }
+
+  if (infoGrid) {
+    const extras = [];
+    const typeLabel = circuitTypeLabel(info.circuit_type);
+    if (typeLabel) {
+      extras.push(
+        `<div class="stat-card"><div class="stat-card__label">Tipo de circuito</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${typeLabel}</div></div>`
+      );
+    }
+    if (info.gmt_offset) {
+      const gmt = info.gmt_offset.replace(/:00$/, '');
+      extras.push(
+        `<div class="stat-card"><div class="stat-card__label">Fuso (GMT)</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${gmt}</div></div>`
+      );
+    }
+    if (extras.length) {
+      infoGrid.insertAdjacentHTML('beforeend', extras.join(''));
+      observeReveals(infoGrid);
+    }
+  }
+}
+
 async function loadGP() {
   const root = document.getElementById('gp-root');
   try {
@@ -89,7 +145,9 @@ async function loadGP() {
 
       <section class="section" style="padding-top: var(--space-10);">
         <div class="container">
-          <div class="gp-info-grid" data-reveal-stagger>
+          <div id="circuit-map-host"></div>
+
+          <div class="gp-info-grid" id="gp-info-grid" data-reveal-stagger>
             <div class="stat-card"><div class="stat-card__label">Data</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${formatDate(race.date)}</div></div>
             <div class="stat-card"><div class="stat-card__label">Horário (corrida)</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${race.time ? formatTime(race.date, race.time) : '—'}</div></div>
             <div class="stat-card"><div class="stat-card__label">Status</div><div class="stat-card__value" style="font-size: var(--fs-lg);">${isPast ? 'Realizada' : 'Programada'}</div></div>
@@ -144,9 +202,19 @@ async function loadGP() {
     const initial = tabs.querySelector('[aria-selected="true"]');
     if (initial) renderTab(initial.dataset.tab);
 
+    loadCircuit(race);
+
     observeReveals(root);
-  } catch (err) {
-    root.innerHTML = `<div class="container section"><div class="error-message">Falha ao carregar GP: ${err.message}</div></div>`;
+  } catch {
+    root.innerHTML = `
+      <div class="container section">
+        <div class="empty-state">
+          <h3>Não foi possível carregar o GP</h3>
+          <p>Os dados estão indisponíveis no momento. Tente novamente em instantes.</p>
+          <a class="btn btn-ghost" href="./calendario.html">Voltar para o calendário</a>
+        </div>
+      </div>
+    `;
   }
 }
 
